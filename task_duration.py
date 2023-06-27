@@ -225,7 +225,8 @@ print(df_duration)
 
 """
 list_of_apps = get_list_of_migrated_apps()
-print(len(list_of_apps))
+# print(len(list_of_apps))
+# list_of_apps = list_of_apps[0:1]
 # list_of_apps = [264785]
 # list_of_apps = list_of_apps[50:100]
 
@@ -237,6 +238,10 @@ for app_id in list_of_apps:
 # display(df_duration)
 
 # df_duration.to_excel('./results/ADO_MS_duration_extract_3.xlsx', sheet_name='duration', index=False)
-df_duration.to_csv('./results/ADO_MS_duration_extract_17-270623.csv', index = False)
+# df_duration.to_csv('./results/ADO_MS_duration_extract_17-270623.csv', index = False)
+
+# 
+df_duration.to_csv('./result/task_durations.csv', index = False)
+
 end_time = time.time()/60 # sec
 print(end_time - start_time)
