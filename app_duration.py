@@ -1,6 +1,6 @@
 import pandas as pd
 
-a = pd.read_csv('./results/input_for_pandas.csv')
+a = pd.read_csv('./results/task_durations.csv')
 
 # generate pd w/ start times
 df_start_tasks = a.loc[a['Task'].isin([
@@ -43,4 +43,4 @@ merged_pd = pd.merge(df_app_start, df_app_end, on='App name')
 merged_pd['Duration'] = round((merged_pd['App end'] - merged_pd['App start']).dt.total_seconds()/60)
 
 # print(merged_pd.head())
-merged_pd.to_csv('output_x.csv')
+merged_pd.to_csv('./result/app_durations.csv')
