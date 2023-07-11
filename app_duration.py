@@ -1,12 +1,14 @@
 import pandas as pd
 
-a = pd.read_csv('./results/task_durations.csv')
+a = pd.read_csv('./result/task_durations_110723.csv')
+print(a)
 
 # generate pd w/ start times
 df_start_tasks = a.loc[a['Task'].isin([
     'TA50.10.040 - Stop scheduled application specific jobs - on source VM', 
-    'TA50.10.050 - Stop application specific services on VMs in PIaaS', 
-    'TA50.20.020 - Shutdown On-Premises Source Servers using AXALIS Tool'
+    'TA50.10.050 - Stop application specific services on VMs in PIaaS',
+    'TA50.10.050 - Stop required services in source PIaaS SQL VMs (only if SQL is in HA)',
+    'TA50.20.020 - Shutdown On-Premises Source Servers using AXALIS Tool',
 ])]
 
 
@@ -43,4 +45,4 @@ merged_pd = pd.merge(df_app_start, df_app_end, on='App name')
 merged_pd['Duration'] = round((merged_pd['App end'] - merged_pd['App start']).dt.total_seconds()/60)
 
 # print(merged_pd.head())
-merged_pd.to_csv('./result/app_durations.csv')
+merged_pd.to_csv('./result/app_durations_110723.csv')
