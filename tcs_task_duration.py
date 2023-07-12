@@ -21,7 +21,8 @@ cols_duration =  [
     #"User story id", 
     #"User story", 
     "Task id", 
-    "Task", 
+    "Task",
+    "Task description",
     "Start time",
     "End time",
     "Duration (min)"
@@ -78,13 +79,15 @@ def get_duration(workitem_id):
         headers=headers,
     )
     changes = response.json()["value"]
-
+    
     for state_change in reversed(changes):
         try:
             title = state_change["fields"]["Custom.PlaybookActivities"]['newValue']
+            task_description = state_change["fields"]["Custom.PlaybookSubActivities"]['newValue']
             break
         except:
             title = None
+            task_description = None
     
     
     app_history = response.json()["value"]
@@ -150,7 +153,38 @@ def get_duration(workitem_id):
     # end of closed w/o in progress
 
 
-    return (duration_min, title, start_time, end_time)
+    return (duration_min, title, task_description, start_time, end_time)
+
+
+
+
+
+def get_app_title(workitem_id):
+    #
+    # 
+    #
+    url = 'https://dev.azure.com/' + ORGANIZATION_NAME + '/_apis/wit/workItems/' + str(workitem_id) + '?$expand=all'
+    # print(url)
+    # url = 'https://dev.azure.com/' + ORGANIZATION_NAME + '/' + PROJECT_NAME + '/_apis/wit/workItems/' + str(workitem_id) + '/updates?api-version=7.0'
+
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Basic '+ authorization
+    }
+    response = requests.get(
+        url = url,
+        headers=headers,
+    )
+
+    try:
+        title = response.json()["fields"]["System.Title"]
+    except:
+        title = None
+    
+    return title
+
+
+
 
 
 
@@ -160,12 +194,14 @@ def save_duration_to_df(app_id, df_duration):
     #
     #
     #
-    duration_x, app_title, start_time, end_time = get_duration(app_id)
+    app_title = get_app_title(app_id)
+
     task_ids = get_childs_list(app_id)
     
     for task_id in task_ids:
-        duration, task_title, start_time, end_time = get_duration(task_id)
-        new_row = [app_id, app_title, task_id, task_title, start_time, end_time, duration]
+        # duration, task_title, start_time, end_time = get_duration(task_id)
+        duration, task_title, task_description, start_time, end_time = get_duration(task_id)
+        new_row = [app_id, app_title, task_id, task_title, task_description, start_time, end_time, duration]
         # new_row = [app_id, app_title, feature_id, feature_title, user_story_id, user_story_title, task_id, task_title, start_time, end_time, duration]
         new_df = pd.DataFrame([new_row], columns=cols_duration)
         df_duration = pd.concat([df_duration, new_df], ignore_index = True)
@@ -186,7 +222,7 @@ def get_list_of_migrated_apps():
     url = "https://dev.azure.com/" + ORGANIZATION_NAME + "/" + PROJECT_NAME + "/_apis/wit/wiql/00571464-1724-47f6-9e0d-57d4a38a7758"
     
     # for tests
-    # url = "https://dev.azure.com/" + ORGANIZATION_NAME + "/" + PROJECT_NAME + "/_apis/wit/wiql/cf2b3520-cd93-433d-8c45-46ab4c4c9ada"
+    url = "https://dev.azure.com/" + ORGANIZATION_NAME + "/" + PROJECT_NAME + "/_apis/wit/wiql/cf2b3520-cd93-433d-8c45-46ab4c4c9ada"
     headers = {
         'Accept': 'application/json',
         'Authorization': 'Basic '+ authorization
@@ -232,7 +268,7 @@ list_of_apps = get_list_of_migrated_apps()
 for app_id in list_of_apps:
     df_duration = save_duration_to_df(app_id, df_duration)
 
-print(df_duration)
+# print(df_duration)
 df_duration.to_csv('./results/tempo_all_tcs.csv', index = False)
 
 
@@ -249,7 +285,7 @@ df_duration.to_csv('./results/tempo_all_tcs.csv', index = False)
 
 # 
 '''
-df_duration.to_csv('./result/task_durations.csv', index = False)
+df_duration.to_csv('./result/task_kirontech.csv', index = False)
 '''
 end_time = time.time()/60 # sec
 print(end_time - start_time)
